@@ -348,3 +348,38 @@ export interface IntegrationService {
   }[];
 }
 
+export interface TimecardPunch {
+  id: string;
+  shiftId: string;
+  shiftNumber: string;
+  clinicianId: string;
+  clinicianName: string;
+  clinicianAvatar: string;
+  role: string;
+  departmentId: string;
+  departmentName: string;
+  date: string;
+  scheduledStart: string;
+  scheduledEnd: string;
+  actualClockIn?: string;
+  actualClockOut?: string;
+  status: 'on_duty' | 'on_break' | 'completed' | 'scheduled' | 'late' | 'flagged';
+  elapsedHoursFormatted: string;
+  breakMinutesTaken: number;
+  breakReliefNurse?: string;
+  geofenceVerified: boolean;
+  distanceMeters: number;
+  beaconVerified: boolean;
+  beaconId?: string;
+  wifiBssid?: string;
+  hourlyRate: number;
+  overtimeHours: number;
+  restGapHoursSinceLastShift: number;
+  hasFatigueWarning: boolean;
+  supervisorApprovalStatus: 'pending' | 'approved' | 'adjusted' | 'rejected';
+  supervisorApprovedBy?: string;
+  supervisorApprovedAt?: string;
+  adjustmentReason?: string;
+  disputeFlag?: boolean;
+}
+

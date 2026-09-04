@@ -94,9 +94,9 @@ export const Header: React.FC<HeaderProps> = ({
             title="Audit and verify all 18 functional requirements"
           >
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>System Verification (18 Checks)</span>
+            <span>System Verification (19 Checks)</span>
             <span className="text-[10px] bg-emerald-200 text-emerald-900 px-1.5 py-0.2 rounded font-mono font-black">
-              18/18
+              19/19
             </span>
           </button>
         )}

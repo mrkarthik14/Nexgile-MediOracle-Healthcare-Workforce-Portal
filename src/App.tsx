@@ -34,6 +34,7 @@ import { DisputeEvidenceModal } from './components/DisputeEvidenceModal';
 import { QualityManagementView } from './components/QualityManagementView';
 import { SupportCaseManagementView } from './components/SupportCaseManagementView';
 import { IntegrationsView } from './components/IntegrationsView';
+import { TimekeepingView } from './components/TimekeepingView';
 
 export default function App() {
   // Authentication & Session State
@@ -563,6 +564,13 @@ export default function App() {
                       onOpenBroadcastModal={() => setIsBroadcastModalOpen(true)}
                       selectedDeptFilter={selectedDeptFilter}
                       onClearDeptFilter={() => setSelectedDeptFilter(undefined)}
+                    />
+                  )}
+
+                  {activeTab === 'timekeeping' && (
+                    <TimekeepingView
+                      onAddAuditLog={handleAddAuditLog}
+                      onSyncToTimesheets={() => setActiveTab('billing')}
                     />
                   )}
 

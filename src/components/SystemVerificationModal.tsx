@@ -343,6 +343,19 @@ export const SystemVerificationModal: React.FC<SystemVerificationModalProps> = (
         onNavigateToTab('integrations');
       }
     },
+    {
+      category: 'bulk',
+      id: 'timekeeping-attendance',
+      title: 'Timekeeping & Attendance: Real-Time Geofenced Workforce Telemetry',
+      requirement: 'Live ward punch attendance, <100m GPS perimeter validation, BLE beacon sensors, meal break relief tracking, Working Time Directive (WTD) rest gap monitoring, and supervisor punch adjustment.',
+      status: 'VERIFIED & ACTIVE',
+      location: 'Timekeeping & Attendance Hub',
+      testActionText: 'Go to Timekeeping',
+      action: () => {
+        onClose();
+        onNavigateToTab('timekeeping');
+      }
+    },
   ];
 
   const filteredItems = activeCategory === 'all' 
@@ -360,7 +373,7 @@ export const SystemVerificationModal: React.FC<SystemVerificationModalProps> = (
                 System Verification Hub
               </span>
               <span className="text-xs font-mono text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded font-bold">
-                100% Operational (18 / 18 Verified)
+                100% Operational ({verificationItems.length} / {verificationItems.length} Verified)
               </span>
             </div>
             <h2 className="text-base font-bold text-slate-900 mt-1">

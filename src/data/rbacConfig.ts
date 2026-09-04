@@ -30,7 +30,7 @@ export const ROLE_DEFINITIONS: Record<Role, RoleAccessDefinition> = {
     portal: 'facility',
     portalLabel: 'Hospital Facility Portal',
     landingTab: 'floor',
-    allowedTabs: ['floor', 'shifts', 'matching', 'rbac_guide'],
+    allowedTabs: ['floor', 'shifts', 'timekeeping', 'matching', 'quality', 'support', 'rbac_guide'],
     deniedAccessMessage: 'Ward Scope: Ward Leads manage floor acuity, staffing rosters, and clinical override justifications.',
     canSeeData: [
       'ER-1 & ICU Acuity Levels & Vacancy Gaps',
@@ -51,7 +51,7 @@ export const ROLE_DEFINITIONS: Record<Role, RoleAccessDefinition> = {
     portal: 'facility',
     portalLabel: 'Hospital Facility Portal',
     landingTab: 'floor',
-    allowedTabs: ['floor', 'shifts', 'professionals', 'compliance', 'billing', 'analytics', 'quality', 'support', 'integrations', 'rbac_guide'],
+    allowedTabs: ['floor', 'shifts', 'timekeeping', 'professionals', 'compliance', 'billing', 'analytics', 'quality', 'support', 'integrations', 'rbac_guide'],
     deniedAccessMessage: 'Full facility management scope across wards, budgets, and compliance.',
     canSeeData: [
       'Complete Hospital Floor Management Dashboard',

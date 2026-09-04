@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -7,72 +7,41 @@ import {
   Receipt, 
   BarChart3, 
   Smartphone,
-  ChevronDown,
-  ChevronUp,
   Shield,
   Lock,
   Hospital,
   Building2,
-  Check,
   Stethoscope,
-  BadgeCheck,
-  UserCog,
-  Briefcase,
   Star,
   Headphones,
-  Network
+  Network,
+  Clock,
+  LogOut,
+  CheckCircle2
 } from 'lucide-react';
 import { Role } from '../types';
 import { ROLE_DEFINITIONS } from '../data/rbacConfig';
-import { LogOut } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   currentRole: Role;
-  setCurrentRole: (role: Role) => void;
+  setCurrentRole?: (role: Role) => void;
   onLogout?: () => void;
-}
-
-interface RoleOption {
-  role: Role;
-  name: string;
-  subtitle: string;
-  tag: string;
-  initials: string;
-  avatarBg: string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   setActiveTab,
   currentRole,
-  setCurrentRole,
   onLogout,
 }) => {
-  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
   const currentDef = ROLE_DEFINITIONS[currentRole] || ROLE_DEFINITIONS.facility_admin;
-
-  // Handle click outside to close custom role dropdown
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsRoleDropdownOpen(false);
-      }
-    }
-    if (isRoleDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isRoleDropdownOpen]);
 
   const navItems = [
     { id: 'floor', label: 'Floor Dashboard', icon: LayoutDashboard, category: 'facility' },
     { id: 'shifts', label: 'Shift Management', icon: CalendarClock, category: 'shared' },
+    { id: 'timekeeping', label: 'Timekeeping & Attendance', icon: Clock, category: 'shared', badge: 'Live' },
     { id: 'clinician_mobile', label: 'Clinician App (GPS)', icon: Smartphone, category: 'professional' },
     { id: 'professionals', label: 'Professional Network', icon: Users, category: 'agency' },
     { id: 'compliance', label: 'Compliance & OCR', icon: ShieldCheck, category: 'agency' },
@@ -81,159 +50,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'quality', label: 'Quality & 360 Reviews', icon: Star, category: 'shared' },
     { id: 'support', label: 'Support & Help Desk', icon: Headphones, category: 'agency' },
     { id: 'integrations', label: 'Integrations & APIs', icon: Network, category: 'shared' },
-    { id: 'rbac_guide', label: 'Role Access (RBAC) Guide', icon: Shield, category: 'all', badge: 'Active' },
+    { id: 'rbac_guide', label: 'Role Access (RBAC) Guide', icon: Shield, category: 'all' },
   ];
-
-  const roleCategories: {
-    portalTitle: string;
-    portalSubtitle: string;
-    icon: any;
-    theme: {
-      headerBg: string;
-      headerText: string;
-      border: string;
-      badgeBg: string;
-      badgeText: string;
-    };
-    options: RoleOption[];
-  }[] = [
-    {
-      portalTitle: 'Hospital Facility Portal',
-      portalSubtitle: 'Clinical Wards, Rostering & Administration',
-      icon: Hospital,
-      theme: {
-        headerBg: 'bg-blue-950/80',
-        headerText: 'text-blue-300',
-        border: 'border-blue-800/60',
-        badgeBg: 'bg-blue-500/20',
-        badgeText: 'text-blue-300',
-      },
-      options: [
-        {
-          role: 'facility_admin',
-          name: 'Facility Admin',
-          subtitle: 'John Sterling • Hospital Admin',
-          tag: 'Full CRUD',
-          initials: 'JS',
-          avatarBg: 'bg-blue-600 text-white',
-        },
-        {
-          role: 'ward_lead',
-          name: 'Ward Lead (Physician)',
-          subtitle: 'Dr. Sterling, MD • ER / ICU Lead',
-          tag: 'Acuity & Override',
-          initials: 'DS',
-          avatarBg: 'bg-emerald-600 text-white',
-        },
-        {
-          role: 'finance',
-          name: 'Hospital Finance',
-          subtitle: 'Amanda Brooks, CPA • Controller',
-          tag: 'Budget & Aging',
-          initials: 'AB',
-          avatarBg: 'bg-amber-600 text-white',
-        },
-      ],
-    },
-    {
-      portalTitle: 'Clinician / Nurse Portal',
-      portalSubtitle: 'Personal Shifts, GPS Geofencing & Instant Pay',
-      icon: Stethoscope,
-      theme: {
-        headerBg: 'bg-cyan-950/80',
-        headerText: 'text-cyan-300',
-        border: 'border-cyan-800/60',
-        badgeBg: 'bg-cyan-500/20',
-        badgeText: 'text-cyan-300',
-      },
-      options: [
-        {
-          role: 'professional',
-          name: 'Nurse / Clinician',
-          subtitle: 'Sarah Chen, RN • Critical Care RN-882',
-          tag: 'Zero-Trust Scoped',
-          initials: 'SC',
-          avatarBg: 'bg-cyan-500 text-slate-950 font-black',
-        },
-      ],
-    },
-    {
-      portalTitle: 'Agency Staffing Portal',
-      portalSubtitle: 'Compliance Verifications, Payroll & Matchmaking',
-      icon: Building2,
-      theme: {
-        headerBg: 'bg-purple-950/80',
-        headerText: 'text-purple-300',
-        border: 'border-purple-800/60',
-        badgeBg: 'bg-purple-500/20',
-        badgeText: 'text-purple-300',
-      },
-      options: [
-        {
-          role: 'compliance_officer',
-          name: 'Compliance Auditor',
-          subtitle: 'Patricia Ramos • Regulatory Lead',
-          tag: 'OCR & WTD Rules',
-          initials: 'PR',
-          avatarBg: 'bg-purple-600 text-white',
-        },
-        {
-          role: 'payroll',
-          name: 'Agency Payroll',
-          subtitle: 'Marcus Sterling • Remittance Lead',
-          tag: 'Instant Payouts',
-          initials: 'MS',
-          avatarBg: 'bg-indigo-600 text-white',
-        },
-        {
-          role: 'support_agent',
-          name: 'Support Helpdesk',
-          subtitle: 'Chloe Davis • Ops Specialist',
-          tag: 'Incident Cases',
-          initials: 'CD',
-          avatarBg: 'bg-pink-600 text-white',
-        },
-        {
-          role: 'recruiter',
-          name: 'Clinical Recruiter',
-          subtitle: 'Jessica Gomez • Talent Lead',
-          tag: 'Match Dispatch',
-          initials: 'JG',
-          avatarBg: 'bg-teal-600 text-white',
-        },
-        {
-          role: 'business_leader',
-          name: 'Business Leader',
-          subtitle: 'Robert Vance, VP • Workforce Ops',
-          tag: 'KPI Analytics',
-          initials: 'RV',
-          avatarBg: 'bg-orange-600 text-white',
-        },
-        {
-          role: 'agency_admin',
-          name: 'Agency Director',
-          subtitle: 'Arthur Pendelton • Director',
-          tag: 'Full Agency Scope',
-          initials: 'AP',
-          avatarBg: 'bg-violet-600 text-white',
-        },
-      ],
-    },
-  ];
-
-  // Helper to switch role and navigate to appropriate landing tab
-  const handleSelectRole = (newRole: Role) => {
-    setCurrentRole(newRole);
-    setIsRoleDropdownOpen(false);
-    const targetDef = ROLE_DEFINITIONS[newRole];
-    if (targetDef && !targetDef.allowedTabs.includes(activeTab)) {
-      setActiveTab(targetDef.landingTab);
-    }
-  };
-
-  // Find currently selected role meta
-  const allRolesFlat = roleCategories.flatMap(c => c.options);
-  const currentActiveOption = allRolesFlat.find(r => r.role === currentRole) || allRolesFlat[0];
 
   return (
     <aside id="main-sidebar" className="w-64 bg-[#0F172A] text-white flex flex-col flex-shrink-0 border-r border-slate-800 select-none relative">
@@ -310,175 +128,49 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </nav>
 
-      {/* Enhanced Role Switcher Component with Neatly Arranged Custom Popover */}
-      <div className="p-3.5 mt-auto border-t border-slate-700/80 bg-slate-900/95 relative" ref={dropdownRef}>
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[9px] uppercase tracking-wider text-slate-400 font-extrabold flex items-center space-x-1">
-            <UserCog className="w-3 h-3 text-blue-400" />
-            <span>Simulate User Role</span>
-          </span>
-          <span className="text-[9px] font-bold text-blue-400 uppercase tracking-widest bg-blue-950/80 px-1.5 py-0.2 rounded border border-blue-800/70">
-            RBAC Active
-          </span>
-        </div>
-
-        {/* Interactive Role Trigger Card */}
-        <button
-          type="button"
-          id="role-switcher-custom-trigger"
-          onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-          className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-            isRoleDropdownOpen 
-              ? 'bg-slate-800 border-blue-500 ring-2 ring-blue-500/30' 
-              : 'bg-slate-800/90 hover:bg-slate-800 border-slate-700 hover:border-slate-600'
-          }`}
-        >
+      {/* User Session Profile Footer (Role switcher removed as requested) */}
+      <div className="p-3.5 mt-auto border-t border-slate-800 bg-slate-900/95">
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2.5 min-w-0">
-            <div className={`w-8 h-8 rounded-lg ${currentActiveOption.avatarBg} flex items-center justify-center font-extrabold text-xs flex-shrink-0 shadow-xs`}>
-              {currentActiveOption.initials}
+            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-xs flex-shrink-0 shadow-xs">
+              JS
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center space-x-1.5">
-                <span className="text-xs font-black text-white truncate">
-                  {currentActiveOption.name}
+                <span className="text-xs font-bold text-white truncate">
+                  John Sterling
                 </span>
               </div>
               <p className="text-[10px] text-slate-400 truncate leading-tight font-medium">
-                {currentActiveOption.subtitle.split('•')[0].trim()}
+                Hospital Administrator
               </p>
             </div>
           </div>
-          <div className="ml-2 flex-shrink-0 text-slate-400">
-            {isRoleDropdownOpen ? (
-              <ChevronUp className="w-4 h-4 text-blue-400" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
-          </div>
-        </button>
 
-        {/* Custom Neatly Arranged Popover Menu with Enhanced Headings & Vibrant Colors */}
-        {isRoleDropdownOpen && (
-          <div 
-            id="role-switcher-popover"
-            className="absolute bottom-full left-2 right-2 mb-2 bg-[#0B1120] border-2 border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[480px] flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-150"
-          >
-            {/* Popover Title Bar */}
-            <div className="p-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-300 flex items-center space-x-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Select Simulated Role</span>
-                </span>
-                <p className="text-[10px] text-slate-400 font-medium">
-                  Dashboards & permissions adapt instantly
-                </p>
-              </div>
-              <span className="text-[9px] bg-slate-800 text-slate-300 font-bold px-1.5 py-0.5 rounded border border-slate-700">
-                10 Roles
-              </span>
-            </div>
+          {onLogout && (
+            <button
+              id="sidebar-logout-btn"
+              type="button"
+              onClick={onLogout}
+              className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+              title="Sign Out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
+        </div>
 
-            {/* Scrollable Role Categories List */}
-            <div className="overflow-y-auto p-2.5 space-y-3.5 divide-y divide-slate-800/80">
-              {roleCategories.map((cat, catIndex) => {
-                const Icon = cat.icon;
-                return (
-                  <div key={cat.portalTitle} className={catIndex > 0 ? 'pt-3' : ''}>
-                    {/* ENHANCED CATEGORY HEADING with vivid theme styling */}
-                    <div className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg mb-2 border ${cat.theme.headerBg} ${cat.theme.border}`}>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 rounded flex items-center justify-center">
-                          <Icon className={`w-3.5 h-3.5 ${cat.theme.headerText}`} />
-                        </div>
-                        <div>
-                          <h4 className={`text-[11px] font-black uppercase tracking-wider ${cat.theme.headerText}`}>
-                            {cat.portalTitle}
-                          </h4>
-                        </div>
-                      </div>
-                      <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded ${cat.theme.badgeBg} ${cat.theme.badgeText}`}>
-                        {cat.options.length} Roles
-                      </span>
-                    </div>
-
-                    {/* Role Items in this Category */}
-                    <div className="space-y-1">
-                      {cat.options.map((opt) => {
-                        const isSelected = currentRole === opt.role;
-                        return (
-                          <button
-                            key={opt.role}
-                            id={`role-item-${opt.role}`}
-                            onClick={() => handleSelectRole(opt.role)}
-                            className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-blue-600/20 border border-blue-500/80 ring-1 ring-blue-500 shadow-sm'
-                                : 'hover:bg-slate-800/90 border border-transparent hover:border-slate-700/60'
-                            }`}
-                          >
-                            <div className="flex items-center space-x-2.5 min-w-0">
-                              {/* Avatar Icon */}
-                              <div className={`w-7 h-7 rounded-lg ${opt.avatarBg} flex items-center justify-center text-[10px] font-black flex-shrink-0 shadow-xs`}>
-                                {opt.initials}
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center space-x-1.5">
-                                  <span className={`text-xs font-bold leading-tight ${isSelected ? 'text-white font-extrabold' : 'text-slate-200'}`}>
-                                    {opt.name}
-                                  </span>
-                                </div>
-                                <p className="text-[10px] text-slate-400 truncate leading-snug">
-                                  {opt.subtitle}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Tag & Selection Indicator */}
-                            <div className="flex items-center space-x-1.5 ml-2 flex-shrink-0">
-                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-tight ${
-                                isSelected 
-                                  ? 'bg-blue-500 text-white font-black' 
-                                  : 'bg-slate-800 text-slate-400 border border-slate-700'
-                              }`}>
-                                {opt.tag}
-                              </span>
-                              {isSelected && (
-                                <Check className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
-                              )}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Bottom Helper Footer */}
-            <div className="p-2.5 bg-slate-900 border-t border-slate-800 flex items-center justify-between">
-              <span className="text-[9px] text-slate-400 font-medium">
-                Switch role or return to gateway
-              </span>
-              {onLogout && (
-                <button
-                  type="button"
-                  id="sidebar-logout-btn"
-                  onClick={() => {
-                    setIsRoleDropdownOpen(false);
-                    onLogout();
-                  }}
-                  className="flex items-center space-x-1.5 text-[10px] text-red-400 hover:text-white font-bold bg-red-950/70 hover:bg-red-900 border border-red-800/80 px-2 py-1 rounded cursor-pointer transition-colors"
-                >
-                  <LogOut className="w-3 h-3" />
-                  <span>Log Out</span>
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+        <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400">
+          <span className="flex items-center space-x-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>St. Jude Medical</span>
+          </span>
+          <span className="text-[9px] font-mono text-emerald-400 font-bold bg-emerald-950/80 px-1.5 py-0.2 rounded border border-emerald-800/60">
+            SESSION ACTIVE
+          </span>
+        </div>
       </div>
     </aside>
   );
 };
+
