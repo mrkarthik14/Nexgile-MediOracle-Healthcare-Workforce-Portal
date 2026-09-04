@@ -21,6 +21,7 @@ import { ROLE_DEFINITIONS } from '../data/rbacConfig';
 
 interface LoginPageProps {
   onLogin: (role: Role, userEmail?: string) => void;
+  onOpenVerificationModal?: () => void;
 }
 
 interface RoleCredentials {
@@ -34,7 +35,7 @@ interface RoleCredentials {
   defaultPass: string;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onOpenVerificationModal }) => {
   // Currently selected role for credentials form
   const [selectedRole, setSelectedRole] = useState<Role>('facility_admin');
   const [emailInput, setEmailInput] = useState('john.sterling@stjudehospital.org');
@@ -269,17 +270,27 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           </div>
         </div>
 
-        {/* Security Badges */}
-        <div className="hidden md:flex items-center space-x-3 text-[11px]">
-          <span className="flex items-center space-x-1.5 text-emerald-400 bg-emerald-950/60 border border-emerald-800/70 px-2.5 py-1 rounded-full font-bold">
+        {/* Security Badges & Verification Trigger */}
+        <div className="flex items-center space-x-3 text-[11px]">
+          {onOpenVerificationModal && (
+            <button
+              onClick={onOpenVerificationModal}
+              id="login-view-all-checks-btn"
+              className="flex items-center space-x-1.5 text-emerald-400 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/80 px-3 py-1 rounded-full font-bold transition-all cursor-pointer shadow-xs"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>System Functional Audit (18 Checks)</span>
+            </button>
+          )}
+          <span className="hidden md:flex items-center space-x-1.5 text-emerald-400 bg-emerald-950/60 border border-emerald-800/70 px-2.5 py-1 rounded-full font-bold">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>TLS 1.3 (256-Bit)</span>
           </span>
-          <span className="flex items-center space-x-1.5 text-blue-300 bg-blue-950/60 border border-blue-800/70 px-2.5 py-1 rounded-full font-bold">
+          <span className="hidden md:flex items-center space-x-1.5 text-blue-300 bg-blue-950/60 border border-blue-800/70 px-2.5 py-1 rounded-full font-bold">
             <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
             <span>HIPAA / SOC-2 Type II</span>
           </span>
-          <span className="flex items-center space-x-1.5 text-purple-300 bg-purple-950/60 border border-purple-800/70 px-2.5 py-1 rounded-full font-bold">
+          <span className="hidden md:flex items-center space-x-1.5 text-purple-300 bg-purple-950/60 border border-purple-800/70 px-2.5 py-1 rounded-full font-bold">
             <Lock className="w-3 h-3 text-purple-400" />
             <span>Zero-Trust RBAC</span>
           </span>

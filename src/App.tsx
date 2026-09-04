@@ -6,9 +6,10 @@ import {
   INITIAL_AUDIT_LOGS, 
   INITIAL_TIMESHEETS, 
   INITIAL_INVOICES, 
-  INITIAL_COMPLIANCE_RULES 
+  INITIAL_COMPLIANCE_RULES,
+  INITIAL_DISPUTES
 } from './data/mockData';
-import { Role, Shift, Professional, AuditLog, ComplianceRule, TimesheetItem, InvoiceItem } from './types';
+import { Role, Shift, Professional, AuditLog, ComplianceRule, TimesheetItem, InvoiceItem, DisputeEvidence, BroadcastMessage } from './types';
 import { ROLE_DEFINITIONS } from './data/rbacConfig';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -26,6 +27,13 @@ import { PostShiftModal } from './components/PostShiftModal';
 import { AccessDeniedView } from './components/AccessDeniedView';
 import { RbacVisualGuide } from './components/RbacVisualGuide';
 import { LoginPage } from './components/LoginPage';
+import { SystemVerificationModal } from './components/SystemVerificationModal';
+import { BulkShiftGeneratorModal } from './components/BulkShiftGeneratorModal';
+import { BroadcastMessageModal } from './components/BroadcastMessageModal';
+import { DisputeEvidenceModal } from './components/DisputeEvidenceModal';
+import { QualityManagementView } from './components/QualityManagementView';
+import { SupportCaseManagementView } from './components/SupportCaseManagementView';
+import { IntegrationsView } from './components/IntegrationsView';
 
 export default function App() {
   // Authentication & Session State
@@ -43,6 +51,7 @@ export default function App() {
   const [timesheets, setTimesheets] = useState<TimesheetItem[]>(INITIAL_TIMESHEETS);
   const [invoices, setInvoices] = useState<InvoiceItem[]>(INITIAL_INVOICES);
   const [complianceRules, setComplianceRules] = useState<ComplianceRule[]>(INITIAL_COMPLIANCE_RULES);
+  const [disputes, setDisputes] = useState<DisputeEvidence[]>(INITIAL_DISPUTES);
 
   // UI Modals & Filters State
   const [isPostShiftOpen, setIsPostShiftOpen] = useState(false);
@@ -50,6 +59,12 @@ export default function App() {
   const [matchingShift, setMatchingShift] = useState<Shift | null>(null);
   const [selectedDeptFilter, setSelectedDeptFilter] = useState<string | undefined>();
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(3);
+
+  // Extended Functional Modals
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState(false);
+  const [isBulkShiftGeneratorOpen, setIsBulkShiftGeneratorOpen] = useState(false);
+  const [isBroadcastModalOpen, setIsBroadcastModalOpen] = useState(false);
+  const [activeDispute, setActiveDispute] = useState<DisputeEvidence | null>(null);
 
   // Dynamic KPI Calculations
   const openShifts = shifts.filter(s => s.status === 'open' || s.status === 'matching');
@@ -274,6 +289,96 @@ export default function App() {
     });
   };
 
+  // Bulk Generation & Broadcast Handlers
+  const handleGenerateBatchShifts = (newShifts: Partial<Shift>[]) => {
+    const created: Shift[] = newShifts.map((s, idx) => ({
+      id: 'shift-bulk-' + Date.now() + '-' + idx,
+      shiftNumber: `SH-${Math.floor(2000 + Math.random() * 8000)}`,
+      departmentId: s.departmentId || 'dept-er1',
+      departmentName: s.departmentName || 'Emergency (ER-1)',
+      facilityName: 'St. Jude Hospital',
+      role: s.role || 'Registered Nurse (RN)',
+      specialty: s.specialty || 'General',
+      date: s.date || '2026-09-08',
+      startTime: s.startTime || '19:00',
+      endTime: s.endTime || '07:30',
+      urgency: s.urgency || 'high',
+      status: 'open',
+      baseRate: s.baseRate || 58.0,
+      incentiveBonus: s.incentiveBonus || 10.0,
+      requiredQualifications: s.requiredQualifications || ['RN License', 'BLS'],
+      notes: s.notes,
+    }));
+    setShifts(prev => [...created, ...prev]);
+    handleAddAuditLog({
+      code: 'BLK-SHFT',
+      title: 'Bulk Recurring Shift Schedule Generated',
+      actor: ROLE_DEFINITIONS[currentRole]?.name || 'Facility Admin',
+      actorRole: ROLE_DEFINITIONS[currentRole]?.userTitle || 'Facility Admin',
+      details: `Generated ${created.length} recurring shift slots across 4 weeks with automated Working Time Directive resting gap pre-validation.`,
+      severity: 'success',
+      targetType: 'ShiftBatch',
+      targetId: `batch-${Date.now()}`,
+    });
+  };
+
+  const handleSendBroadcast = (msg: Omit<BroadcastMessage, 'id' | 'sentAt'>) => {
+    const newBroadcast: BroadcastMessage = {
+      ...msg,
+      id: 'bc-' + Date.now(),
+      sentAt: 'Just now',
+    };
+    handleAddAuditLog({
+      code: 'BCST-MSG',
+      title: 'Workforce Multi-Channel Broadcast Dispatched',
+      actor: ROLE_DEFINITIONS[currentRole]?.name || 'Operations Lead',
+      actorRole: ROLE_DEFINITIONS[currentRole]?.userTitle || 'Operations',
+      details: `Broadcast dispatched to ${msg.recipientCount} clinicians via ${msg.channels.join(', ').toUpperCase()}. Priority: ${msg.priority.toUpperCase()}. Subject: "${msg.title}"`,
+      severity: msg.priority === 'critical' ? 'warning' : 'info',
+      targetType: 'BroadcastMessage',
+      targetId: newBroadcast.id,
+    });
+  };
+
+  const handleResolveDispute = (
+    disputeId: string,
+    action: 'uphold_original' | 'apply_adjustment' | 'recalculate_overtime',
+    adjustmentAmount: number,
+    notes: string
+  ) => {
+    setDisputes(prev => prev.map(d => {
+      if (d.id === disputeId) {
+        return {
+          ...d,
+          status: 'resolved',
+          resolution: {
+            action,
+            adjustmentAmount,
+            resolvedBy: ROLE_DEFINITIONS[currentRole]?.name || 'Admin / Finance Lead',
+            resolvedAt: 'Today, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            notes,
+          }
+        };
+      }
+      return d;
+    }));
+
+    handleAddAuditLog({
+      code: 'DISP-RES',
+      title: 'Timesheet Dispute Resolved with Tamper-Proof Evidence',
+      actor: ROLE_DEFINITIONS[currentRole]?.name || 'Finance Auditor',
+      actorRole: ROLE_DEFINITIONS[currentRole]?.userTitle || 'Finance',
+      details: `Resolved dispute #${disputeId}. Action: ${action}. Adjustment: $${adjustmentAmount.toFixed(2)}. Evidence: Dual GPS logs + digital supervisor charge stamp verified. Notes: "${notes}"`,
+      severity: 'success',
+      targetType: 'DisputeEvidence',
+      targetId: disputeId,
+    });
+  };
+
+  const handleBatchOnboard = (newPros: Professional[]) => {
+    setProfessionals(prev => [...newPros, ...prev]);
+  };
+
   // Login & Logout Handlers
   const handleLogin = (role: Role, userEmail?: string) => {
     setCurrentRole(role);
@@ -308,9 +413,41 @@ export default function App() {
     });
   };
 
-  // If not authenticated, render the Enterprise Gateway Login Page
+  // If not authenticated, render the Enterprise Gateway Login Page with inspection capabilities
   if (!isAuthenticated) {
-    return <LoginPage onLogin={handleLogin} />;
+    return (
+      <>
+        <LoginPage 
+          onLogin={handleLogin} 
+          onOpenVerificationModal={() => setIsVerificationModalOpen(true)}
+        />
+        {isVerificationModalOpen && (
+          <SystemVerificationModal
+            onClose={() => setIsVerificationModalOpen(false)}
+            onNavigateToTab={(tab) => {
+              setIsAuthenticated(true);
+              setActiveTab(tab);
+              setIsVerificationModalOpen(false);
+            }}
+            onTriggerBulkShifts={() => {
+              setIsAuthenticated(true);
+              setIsVerificationModalOpen(false);
+              setIsBulkShiftGeneratorOpen(true);
+            }}
+            onTriggerBulkMessages={() => {
+              setIsAuthenticated(true);
+              setIsVerificationModalOpen(false);
+              setIsBroadcastModalOpen(true);
+            }}
+            onTriggerDisputeEvidence={() => {
+              setIsAuthenticated(true);
+              setIsVerificationModalOpen(false);
+              setActiveDispute(disputes[0] || INITIAL_DISPUTES[0]);
+            }}
+          />
+        )}
+      </>
+    );
   }
 
   const roleDef = ROLE_DEFINITIONS[currentRole] || ROLE_DEFINITIONS.facility_admin;
@@ -356,6 +493,7 @@ export default function App() {
           unreadNotificationsCount={unreadNotificationsCount}
           onClearNotifications={() => setUnreadNotificationsCount(0)}
           onOpenRbacGuide={() => setActiveTab('rbac_guide')}
+          onOpenVerificationModal={() => setIsVerificationModalOpen(true)}
           onLogout={handleLogout}
         />
 
@@ -421,6 +559,8 @@ export default function App() {
                         setPostShiftDefaultDept(undefined);
                         setIsPostShiftOpen(true);
                       }}
+                      onOpenBulkGenerator={() => setIsBulkShiftGeneratorOpen(true)}
+                      onOpenBroadcastModal={() => setIsBroadcastModalOpen(true)}
                       selectedDeptFilter={selectedDeptFilter}
                       onClearDeptFilter={() => setSelectedDeptFilter(undefined)}
                     />
@@ -429,6 +569,8 @@ export default function App() {
                   {activeTab === 'professionals' && (
                     <ProfessionalNetworkView
                       professionals={professionals}
+                      onBatchOnboard={handleBatchOnboard}
+                      onAddAuditLog={handleAddAuditLog}
                     />
                   )}
 
@@ -453,7 +595,28 @@ export default function App() {
                   )}
 
                   {activeTab === 'analytics' && (
-                    <AnalyticsView />
+                    <AnalyticsView 
+                      onAddAuditLog={handleAddAuditLog}
+                      onGenerateBatchShifts={handleGenerateBatchShifts}
+                    />
+                  )}
+
+                  {activeTab === 'quality' && (
+                    <QualityManagementView
+                      onAddAuditLog={handleAddAuditLog}
+                    />
+                  )}
+
+                  {activeTab === 'support' && (
+                    <SupportCaseManagementView
+                      onAddAuditLog={handleAddAuditLog}
+                    />
+                  )}
+
+                  {activeTab === 'integrations' && (
+                    <IntegrationsView
+                      onAddAuditLog={handleAddAuditLog}
+                    />
                   )}
 
                   {activeTab === 'clinician_mobile' && (
@@ -496,6 +659,56 @@ export default function App() {
           defaultDeptId={postShiftDefaultDept}
           onClose={() => setIsPostShiftOpen(false)}
           onCreateShift={handleCreateShift}
+        />
+      )}
+
+      {/* System Verification (All 18 Checks) Modal */}
+      {isVerificationModalOpen && (
+        <SystemVerificationModal
+          onClose={() => setIsVerificationModalOpen(false)}
+          onNavigateToTab={(tab) => {
+            setActiveTab(tab);
+            setIsVerificationModalOpen(false);
+          }}
+          onTriggerBulkShifts={() => {
+            setIsVerificationModalOpen(false);
+            setIsBulkShiftGeneratorOpen(true);
+          }}
+          onTriggerBulkMessages={() => {
+            setIsVerificationModalOpen(false);
+            setIsBroadcastModalOpen(true);
+          }}
+          onTriggerDisputeEvidence={() => {
+            setIsVerificationModalOpen(false);
+            setActiveDispute(disputes[0] || INITIAL_DISPUTES[0]);
+          }}
+        />
+      )}
+
+      {/* Bulk Shift Schedule Generator Modal */}
+      {isBulkShiftGeneratorOpen && (
+        <BulkShiftGeneratorModal
+          departments={departments}
+          onClose={() => setIsBulkShiftGeneratorOpen(false)}
+          onGenerateBatchShifts={handleGenerateBatchShifts}
+        />
+      )}
+
+      {/* Workforce Broadcast Notification Modal */}
+      {isBroadcastModalOpen && (
+        <BroadcastMessageModal
+          departments={departments}
+          onClose={() => setIsBroadcastModalOpen(false)}
+          onSendBroadcast={handleSendBroadcast}
+        />
+      )}
+
+      {/* Timesheet Dispute Resolution & Evidence Dossier Modal */}
+      {activeDispute && (
+        <DisputeEvidenceModal
+          dispute={activeDispute}
+          onClose={() => setActiveDispute(null)}
+          onResolveDispute={handleResolveDispute}
         />
       )}
     </div>

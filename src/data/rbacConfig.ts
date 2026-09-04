@@ -8,7 +8,7 @@ export const ROLE_DEFINITIONS: Record<Role, RoleAccessDefinition> = {
     portal: 'professional',
     portalLabel: 'Clinician / Professional Portal',
     landingTab: 'clinician_mobile',
-    allowedTabs: ['clinician_mobile', 'my_shifts', 'my_credentials', 'rbac_guide'],
+    allowedTabs: ['clinician_mobile', 'my_shifts', 'my_credentials', 'quality', 'rbac_guide'],
     deniedAccessMessage: 'Zero-Trust Scoping: Clinicians can only view their own shifts, verified credentials, and GPS timekeeping.',
     canSeeData: [
       'My Scheduled & Open Shifts',
@@ -51,7 +51,7 @@ export const ROLE_DEFINITIONS: Record<Role, RoleAccessDefinition> = {
     portal: 'facility',
     portalLabel: 'Hospital Facility Portal',
     landingTab: 'floor',
-    allowedTabs: ['floor', 'shifts', 'professionals', 'compliance', 'billing', 'analytics', 'rbac_guide'],
+    allowedTabs: ['floor', 'shifts', 'professionals', 'compliance', 'billing', 'analytics', 'quality', 'support', 'integrations', 'rbac_guide'],
     deniedAccessMessage: 'Full facility management scope across wards, budgets, and compliance.',
     canSeeData: [
       'Complete Hospital Floor Management Dashboard',
@@ -132,7 +132,7 @@ export const ROLE_DEFINITIONS: Record<Role, RoleAccessDefinition> = {
     portal: 'agency',
     portalLabel: 'Agency Staffing Portal',
     landingTab: 'support',
-    allowedTabs: ['support', 'shifts', 'rbac_guide'],
+    allowedTabs: ['support', 'shifts', 'quality', 'rbac_guide'],
     deniedAccessMessage: 'Support scope: Manages shift disputes, incident cases, and urgent staffing queries.',
     canSeeData: [
       'Shift Incident & Dispute Escalation Cases',
@@ -151,7 +151,7 @@ export const ROLE_DEFINITIONS: Record<Role, RoleAccessDefinition> = {
     portal: 'agency',
     portalLabel: 'Agency Staffing Portal',
     landingTab: 'analytics',
-    allowedTabs: ['shifts', 'professionals', 'compliance', 'billing', 'analytics', 'support', 'rbac_guide'],
+    allowedTabs: ['shifts', 'professionals', 'compliance', 'billing', 'analytics', 'quality', 'support', 'integrations', 'rbac_guide'],
     deniedAccessMessage: 'Agency Director scope: Full management of candidate pool, agency billings, and matching dispatch.',
     canSeeData: [
       'All Candidate Placement Metrics & Hit Rates',

@@ -50,7 +50,8 @@ export type ShiftStatus =
   | 'confirmed' 
   | 'in_progress' 
   | 'completed' 
-  | 'cancelled';
+  | 'cancelled'
+  | 'disputed';
 
 export interface Shift {
   id: string;
@@ -78,6 +79,12 @@ export interface Shift {
   requiredQualifications: string[];
   notes?: string;
   isRestPeriodWarning?: boolean;
+  acuityLevel?: string;
+  patientRatio?: string;
+  unpaidBreakMinutes?: number;
+  recurrencePattern?: string;
+  openOpenings?: number;
+  isDisputed?: boolean;
 }
 
 export interface CredentialItem {
@@ -89,6 +96,7 @@ export interface CredentialItem {
   expiryDate: string;
   verifiedAt?: string;
   verifiedBy?: string;
+  primarySource?: string;
 }
 
 export interface Professional {
@@ -105,6 +113,7 @@ export interface Professional {
   reliabilityScore: number; // 0 - 100
   distanceMiles: number;
   hourlyRate: number;
+  status?: 'active' | 'pending' | 'suspended';
   credentials: CredentialItem[];
   matchScore?: {
     total: number;
@@ -148,7 +157,7 @@ export interface TimesheetItem {
   totalBillableHours: number;
   hourlyRate: number;
   totalAmount: number;
-  status: 'draft' | 'submitted' | 'approved' | 'rejected';
+  status: 'draft' | 'submitted' | 'approved' | 'rejected' | 'paid';
   locked: boolean;
   approvedBy?: string;
   approvedAt?: string;
@@ -178,3 +187,164 @@ export interface ComplianceRule {
   scope: string;
   isActive: boolean;
 }
+
+export interface FinancialAdjustment {
+  id: string;
+  invoiceId: string;
+  shiftId?: string;
+  code?: 'ADJ-BREAK-DEDUCT' | 'ADJ-SURGE-CORRECT' | 'ADJ-OVERTIME-AUTH' | 'ADJ-DISPUTE-CREDIT' | string;
+  adjustmentCode?: string;
+  label?: string;
+  amount: number;
+  direction?: 'credit' | 'debit';
+  reason: string;
+  authorizedBy?: string;
+  authorizedRole?: string;
+  appliedBy?: string;
+  appliedAt?: string;
+  timestamp?: string;
+  signedHash?: string;
+  digitalSignature?: string;
+  status?: string;
+}
+
+export interface DisputeEvidence {
+  id: string;
+  timesheetId: string;
+  shiftNumber: string;
+  clinicianName: string;
+  facility: string;
+  disputedHours: number;
+  claimedHours: number;
+  varianceAmount: number;
+  status: 'in_review' | 'evidence_evaluated' | 'resolved';
+  clinicianStatement: string;
+  facilityStatement: string;
+  gpsClockIn: {
+    recordedTime: string;
+    latitude: number;
+    longitude: number;
+    distanceMeters: number;
+    withinGeofence: boolean;
+  };
+  beaconVerification: {
+    beaconId: string;
+    wardLocation: string;
+    verifiedAt: string;
+  };
+  supervisorSignoff: {
+    supervisorName: string;
+    supervisorRole: string;
+    digitalSignature: string;
+    signedAt: string;
+  };
+  resolution?: {
+    action: 'uphold_original' | 'apply_adjustment' | 'recalculate_overtime';
+    adjustmentAmount: number;
+    resolvedBy: string;
+    resolvedAt: string;
+    notes: string;
+  };
+}
+
+export interface ReconciliationRecord {
+  id: string;
+  period: string;
+  facility: string;
+  invoiceTotal: number;
+  timesheetTotal: number;
+  bankDisbursedTotal: number;
+  variance: number;
+  status: 'matched' | 'discrepancy' | 'pending';
+  lastReconciledAt: string;
+  reconciledBy: string;
+}
+
+export interface BroadcastMessage {
+  id: string;
+  title: string;
+  message: string;
+  targetDepartment: string;
+  targetRole: string;
+  channels: ('sms' | 'push' | 'email')[];
+  recipientCount: number;
+  priority: 'normal' | 'urgent' | 'critical';
+  sentAt: string;
+  sender: string;
+}
+
+export interface AIOutcomeMetric {
+  id: string;
+  shiftId: string;
+  candidateId: string;
+  candidateName: string;
+  matchType: 'ai_recommended' | 'human_override';
+  confidenceScore: number;
+  overrideReason?: string;
+  punctualClockIn: boolean;
+  clinicalRating: number;
+  incidentFree: boolean;
+  wardFeedback: string;
+  completedAt: string;
+}
+
+export interface QualityReview {
+  id: string;
+  shiftNumber: string;
+  direction: 'facility_to_clinician' | 'clinician_to_facility';
+  reviewerName: string;
+  reviewerRole: string;
+  targetName: string;
+  rating: number; // 1 to 5
+  categories: {
+    clinicalCompetence?: number;
+    punctuality?: number;
+    teamwork?: number;
+    communication?: number;
+    safetyAdherence?: number;
+    safetyClimate?: number;
+    breakRelief?: number;
+    equipmentAccess?: number;
+    chargeSupport?: number;
+  };
+  feedbackText: string;
+  moderationStatus: 'approved' | 'flagged' | 'redacted' | 'pending';
+  sentiment: 'positive' | 'neutral' | 'flagged';
+  submittedAt: string;
+}
+
+export interface ClinicalReference {
+  id: string;
+  candidateId: string;
+  candidateName: string;
+  refereeName: string;
+  refereeTitle: string;
+  refereeHospital: string;
+  relationship: 'Clinical Preceptor' | 'Charge Nurse' | 'Ward Sister' | 'Clinical Director';
+  status: 'verified' | 'pending_response' | 'flagged';
+  contactMethod: 'email' | 'phone' | 'digital_portal';
+  verifiedAt?: string;
+  clinicalCompetenceRating: number;
+  recommendation: 'strongly_recommend' | 'recommend' | 'recommend_with_reservations';
+  comments: string;
+}
+
+export interface IntegrationService {
+  id: string;
+  category: 'payroll' | 'banking' | 'telephony' | 'geocoding';
+  name: string;
+  provider: string;
+  status: 'connected' | 'healthy' | 'degraded' | 'syncing';
+  lastSync: string;
+  successRate: number;
+  endpoint: string;
+  telemetryMetrics: Record<string, string | number>;
+  recentEvents: {
+    id: string;
+    event: string;
+    status: '200 OK' | '202 Accepted' | '400 Bad Request';
+    timestamp: string;
+    latencyMs: number;
+  }[];
+}
+

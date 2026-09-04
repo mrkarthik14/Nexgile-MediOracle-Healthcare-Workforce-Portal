@@ -27,7 +27,83 @@ export const PostShiftModal: React.FC<PostShiftModalProps> = ({
   const [notes, setNotes] = useState('');
   const [selectedQuals, setSelectedQuals] = useState<string[]>(['RN License', 'BLS', 'ACLS']);
 
+  // Extended Advanced Fields matching Functional Requirements
+  const [acuityLevel, setAcuityLevel] = useState('Level 1 - Resuscitation / Immediate');
+  const [patientRatio, setPatientRatio] = useState('1:2 (High Dependency)');
+  const [unpaidBreakMinutes, setUnpaidBreakMinutes] = useState<number>(30);
+  const [recurrencePattern, setRecurrencePattern] = useState('Single Shift');
+  const [openOpenings, setOpenOpenings] = useState<number>(1);
+
   const qualificationOptions = ['RN License', 'BLS', 'ACLS', 'TNCC', 'PALS', 'CCRN', 'HCA Care Cert', 'Telemetry Cert'];
+
+  const templates = [
+    {
+      id: 'er_trauma',
+      name: 'ER Trauma Night RN',
+      role: 'Registered Nurse (RN)',
+      specialty: 'Emergency / Trauma',
+      urgency: 'critical' as const,
+      baseRate: '58.00',
+      incentiveBonus: '15.00',
+      quals: ['RN License', 'BLS', 'ACLS', 'TNCC'],
+      acuity: 'Level 1 - Resuscitation / Immediate',
+      ratio: '1:2 (High Dependency)',
+      breaks: 30,
+    },
+    {
+      id: 'icu_acute',
+      name: 'ICU 1:1 Resuscitation RN',
+      role: 'Intensive Care Nurse',
+      specialty: 'Intensive Care (ICU)',
+      urgency: 'critical' as const,
+      baseRate: '65.00',
+      incentiveBonus: '20.00',
+      quals: ['RN License', 'BLS', 'ACLS', 'CCRN'],
+      acuity: 'Level 1 - Resuscitation / Immediate',
+      ratio: '1:1 (Critical Care)',
+      breaks: 45,
+    },
+    {
+      id: 'surg_stepdown',
+      name: 'Surgical Step-Down RN',
+      role: 'Registered Nurse (RN)',
+      specialty: 'Post-Op Surgical',
+      urgency: 'high' as const,
+      baseRate: '52.00',
+      incentiveBonus: '8.00',
+      quals: ['RN License', 'BLS', 'Telemetry Cert'],
+      acuity: 'Level 3 - Urgent / Step-Down',
+      ratio: '1:4 (Acute Ward)',
+      breaks: 30,
+    },
+    {
+      id: 'hca_roster',
+      name: 'Healthcare Assistant (HCA)',
+      role: 'Healthcare Assistant (HCA)',
+      specialty: 'Geriatric & Palliative',
+      urgency: 'normal' as const,
+      baseRate: '32.00',
+      incentiveBonus: '5.00',
+      quals: ['HCA Care Cert', 'BLS'],
+      acuity: 'Level 4 - Standard Nursing',
+      ratio: '1:6 (General Ward)',
+      breaks: 60,
+    },
+  ];
+
+  const handleApplyTemplate = (templateId: string) => {
+    const t = templates.find(item => item.id === templateId);
+    if (!t) return;
+    setRole(t.role);
+    setSpecialty(t.specialty);
+    setUrgency(t.urgency);
+    setBaseRate(t.baseRate);
+    setIncentiveBonus(t.incentiveBonus);
+    setSelectedQuals(t.quals);
+    setAcuityLevel(t.acuity);
+    setPatientRatio(t.ratio);
+    setUnpaidBreakMinutes(t.breaks);
+  };
 
   const toggleQual = (qual: string) => {
     if (selectedQuals.includes(qual)) {
@@ -55,6 +131,11 @@ export const PostShiftModal: React.FC<PostShiftModalProps> = ({
       requiredQualifications: selectedQuals,
       notes,
       status: 'open',
+      acuityLevel,
+      patientRatio,
+      unpaidBreakMinutes,
+      recurrencePattern,
+      openOpenings,
     });
     onClose();
   };
@@ -77,7 +158,29 @@ export const PostShiftModal: React.FC<PostShiftModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto">
+          {/* Quick Shift Templates */}
+          <div className="bg-blue-50/70 border border-blue-200 rounded-lg p-2.5">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] font-black uppercase tracking-wider text-blue-900 flex items-center space-x-1">
+                <span>⚡ Load Certified Shift Template:</span>
+              </span>
+              <span className="text-[9px] text-blue-600 font-bold">Auto-fills rates, qualifications & ratios</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              {templates.map((tpl) => (
+                <button
+                  type="button"
+                  key={tpl.id}
+                  onClick={() => handleApplyTemplate(tpl.id)}
+                  className="px-2 py-1.5 rounded bg-white border border-blue-300 text-blue-900 font-bold hover:bg-blue-600 hover:text-white transition-all text-[10px] truncate text-left shadow-2xs cursor-pointer"
+                >
+                  {tpl.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Department and Urgency */}
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -109,6 +212,42 @@ export const PostShiftModal: React.FC<PostShiftModalProps> = ({
                 <option value="critical">Critical Risk (Resuscitation / ICU)</option>
                 <option value="high">High Urgency</option>
                 <option value="normal">Standard Planned Rotation</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Acuity & Target Nurse-to-Patient Ratio */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block font-bold text-slate-700 uppercase text-[10px] mb-1">
+                Clinical Acuity Scale:
+              </label>
+              <select
+                value={acuityLevel}
+                onChange={(e) => setAcuityLevel(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-md p-2 text-xs text-slate-800 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="Level 1 - Resuscitation / Immediate">Level 1 - Resuscitation / Immediate Life Threat</option>
+                <option value="Level 2 - Emergent / Critical">Level 2 - Emergent / Critical Care</option>
+                <option value="Level 3 - Urgent / Step-Down">Level 3 - Urgent / Step-Down</option>
+                <option value="Level 4 - Standard Nursing">Level 4 - Standard Floor Nursing</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 uppercase text-[10px] mb-1">
+                Nurse-to-Patient Target Ratio:
+              </label>
+              <select
+                value={patientRatio}
+                onChange={(e) => setPatientRatio(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-md p-2 text-xs text-slate-800 focus:ring-1 focus:ring-blue-500 focus:outline-none font-semibold"
+              >
+                <option value="1:1 (Critical Care)">1:1 (Dedicated Critical Care / Resus)</option>
+                <option value="1:2 (High Dependency)">1:2 (High Dependency / Trauma)</option>
+                <option value="1:4 (Acute Ward)">1:4 (Acute Medical / Surgical)</option>
+                <option value="1:5 (Standard Step-Down)">1:5 (Standard Step-Down)</option>
+                <option value="1:6 (General Ward)">1:6 (General Ward / Care Home)</option>
               </select>
             </div>
           </div>
@@ -146,8 +285,8 @@ export const PostShiftModal: React.FC<PostShiftModalProps> = ({
             </div>
           </div>
 
-          {/* Date and Time */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* Date, Time and Breaks */}
+          <div className="grid grid-cols-4 gap-3">
             <div>
               <label className="block font-bold text-slate-700 uppercase text-[10px] mb-1">
                 Shift Date:
@@ -182,6 +321,58 @@ export const PostShiftModal: React.FC<PostShiftModalProps> = ({
                 placeholder="07:30"
                 className="w-full bg-white border border-slate-300 rounded-md p-2 text-xs text-slate-800 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono"
               />
+            </div>
+            <div>
+              <label className="block font-bold text-slate-700 uppercase text-[10px] mb-1">
+                Unpaid Break:
+              </label>
+              <select
+                value={unpaidBreakMinutes}
+                onChange={(e) => setUnpaidBreakMinutes(Number(e.target.value))}
+                className="w-full bg-white border border-slate-300 rounded-md p-2 text-xs text-slate-800 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value={30}>30 min meal</option>
+                <option value={45}>45 min meal</option>
+                <option value={60}>60 min meal</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Recurrence Pattern and Bulk Openings */}
+          <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <div>
+              <label className="block font-bold text-slate-700 uppercase text-[10px] mb-1">
+                Recurrence Schedule:
+              </label>
+              <select
+                value={recurrencePattern}
+                onChange={(e) => setRecurrencePattern(e.target.value)}
+                className="w-full bg-white border border-slate-300 rounded-md p-2 text-xs text-slate-800 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="Single Shift">Single Shift (Ad-hoc cover)</option>
+                <option value="3-Day Weekend Block">3-Day Weekend Block (Fri/Sat/Sun)</option>
+                <option value="Weekly 4-Week Block">Weekly Recurrence (4 Weeks)</option>
+                <option value="Daily 5-Shift Rotation">Daily 5-Shift Rotation</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 uppercase text-[10px] mb-1">
+                Bulk Openings Needed:
+              </label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={openOpenings}
+                  onChange={(e) => setOpenOpenings(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-24 bg-white border border-slate-300 rounded-md p-2 text-xs text-slate-800 font-bold text-center focus:ring-1 focus:ring-blue-500"
+                />
+                <span className="text-[11px] text-slate-500">
+                  {openOpenings > 1 ? `Bulk generates ${openOpenings} individual match tickets` : 'Single clinician requisition'}
+                </span>
+              </div>
             </div>
           </div>
 

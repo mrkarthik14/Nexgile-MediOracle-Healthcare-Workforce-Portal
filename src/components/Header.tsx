@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Plus, ShieldCheck, Lock, Sparkles, Smartphone, LogOut } from 'lucide-react';
+import { Bell, Plus, ShieldCheck, Lock, Sparkles, Smartphone, LogOut, CheckCircle2 } from 'lucide-react';
 import { Role } from '../types';
 import { ROLE_DEFINITIONS } from '../data/rbacConfig';
 
@@ -9,6 +9,7 @@ interface HeaderProps {
   unreadNotificationsCount: number;
   onClearNotifications: () => void;
   onOpenRbacGuide?: () => void;
+  onOpenVerificationModal?: () => void;
   onLogout?: () => void;
 }
 
@@ -18,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   unreadNotificationsCount,
   onClearNotifications,
   onOpenRbacGuide,
+  onOpenVerificationModal,
   onLogout,
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -80,6 +82,22 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
             <span>RBAC Security Guide</span>
+          </button>
+        )}
+
+        {/* System Verification (All 18 Checks) Trigger */}
+        {onOpenVerificationModal && (
+          <button
+            id="system-verification-btn"
+            onClick={onOpenVerificationModal}
+            className="flex items-center space-x-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2.5 py-1 rounded-md transition-colors cursor-pointer shadow-xs"
+            title="Audit and verify all 18 functional requirements"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span>System Verification (18 Checks)</span>
+            <span className="text-[10px] bg-emerald-200 text-emerald-900 px-1.5 py-0.2 rounded font-mono font-black">
+              18/18
+            </span>
           </button>
         )}
       </div>

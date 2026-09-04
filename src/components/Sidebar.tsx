@@ -17,7 +17,10 @@ import {
   Stethoscope,
   BadgeCheck,
   UserCog,
-  Briefcase
+  Briefcase,
+  Star,
+  Headphones,
+  Network
 } from 'lucide-react';
 import { Role } from '../types';
 import { ROLE_DEFINITIONS } from '../data/rbacConfig';
@@ -75,6 +78,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'compliance', label: 'Compliance & OCR', icon: ShieldCheck, category: 'agency' },
     { id: 'billing', label: 'Billing & Ledgers', icon: Receipt, category: 'shared' },
     { id: 'analytics', label: 'Analytics & KPIs', icon: BarChart3, category: 'shared' },
+    { id: 'quality', label: 'Quality & 360 Reviews', icon: Star, category: 'shared' },
+    { id: 'support', label: 'Support & Help Desk', icon: Headphones, category: 'agency' },
+    { id: 'integrations', label: 'Integrations & APIs', icon: Network, category: 'shared' },
     { id: 'rbac_guide', label: 'Role Access (RBAC) Guide', icon: Shield, category: 'all', badge: 'Active' },
   ];
 
