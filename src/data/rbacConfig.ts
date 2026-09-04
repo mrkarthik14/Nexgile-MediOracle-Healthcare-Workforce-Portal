@@ -1,0 +1,211 @@
+import { Role, RoleAccessDefinition, PortalType } from '../types';
+
+export const ROLE_DEFINITIONS: Record<Role, RoleAccessDefinition> = {
+  professional: {
+    id: 'professional',
+    name: 'Nurse Sarah Chen, RN',
+    userTitle: 'Critical Care Clinician (RN-882)',
+    portal: 'professional',
+    portalLabel: 'Clinician / Professional Portal',
+    landingTab: 'clinician_mobile',
+    allowedTabs: ['clinician_mobile', 'my_shifts', 'my_credentials', 'rbac_guide'],
+    deniedAccessMessage: 'Zero-Trust Scoping: Clinicians can only view their own shifts, verified credentials, and GPS timekeeping.',
+    canSeeData: [
+      'My Scheduled & Open Shifts',
+      'My GPS Clock-In / Clock-Out Logs (< 100m geofence)',
+      'My Verified Board Licenses & Expirations',
+      'My Timesheets & Instant Pay Payouts ($738.75)',
+    ],
+    blockedData: [
+      '❌ Doctor / Physician Private Medical Handover Notes',
+      '❌ Other Clinicians\' Private Rates & Personnel Dossiers',
+      '❌ Hospital Department Budgets & Master Invoices',
+      '❌ Manager Algorithmic Override Audit Records',
+    ],
+  },
+  ward_lead: {
+    id: 'ward_lead',
+    name: 'Dr. Sterling, MD',
+    userTitle: 'ER & ICU Ward Lead Physician',
+    portal: 'facility',
+    portalLabel: 'Hospital Facility Portal',
+    landingTab: 'floor',
+    allowedTabs: ['floor', 'shifts', 'matching', 'rbac_guide'],
+    deniedAccessMessage: 'Ward Scope: Ward Leads manage floor acuity, staffing rosters, and clinical override justifications.',
+    canSeeData: [
+      'ER-1 & ICU Acuity Levels & Vacancy Gaps',
+      'Ward Shift Rosters & Open Shift Requisitions',
+      'Intelligent Candidate Match Scoring & Factors',
+      'Compulsory Manager Override Justification Submissions',
+    ],
+    blockedData: [
+      '❌ Master Hospital P&L Accounting & Tax Documents',
+      '❌ Agency Placement Commissions & Contracts',
+      '❌ Clinician Home Addresses & Tax ID Numbers',
+    ],
+  },
+  facility_admin: {
+    id: 'facility_admin',
+    name: 'John Sterling',
+    userTitle: 'St. Jude Hospital Chief Administrator',
+    portal: 'facility',
+    portalLabel: 'Hospital Facility Portal',
+    landingTab: 'floor',
+    allowedTabs: ['floor', 'shifts', 'professionals', 'compliance', 'billing', 'analytics', 'rbac_guide'],
+    deniedAccessMessage: 'Full facility management scope across wards, budgets, and compliance.',
+    canSeeData: [
+      'Complete Hospital Floor Management Dashboard',
+      'Requisition Posting (+ POST NEW SHIFT)',
+      'Department Budgets ($42.1k / $60k Utilized)',
+      'Full Immutable Audit Trail (SHA-256 Chained)',
+      'Hospital Invoices & Aging Buckets',
+    ],
+    blockedData: [
+      '❌ Clinician Personal Bank Account Details',
+      '❌ External Agency Internal Recruiter Margin Notes',
+    ],
+  },
+  finance: {
+    id: 'finance',
+    name: 'Amanda Brooks, CPA',
+    userTitle: 'Hospital Financial Controller',
+    portal: 'facility',
+    portalLabel: 'Hospital Facility Portal',
+    landingTab: 'billing',
+    allowedTabs: ['billing', 'analytics', 'rbac_guide'],
+    deniedAccessMessage: 'Financial scope: Access restricted to invoice aging, payments, and spending analytics.',
+    canSeeData: [
+      'Facility Invoices & Aging Buckets (0-30, 31-60, 90+ days)',
+      'Spend vs Budget Allocations by Ward',
+      'Exception-Safe Post-Approval Adjustments',
+      'Overtime & Surge Premium Cost Trends',
+    ],
+    blockedData: [
+      '❌ Clinical Patient Acuity Telemetry',
+      '❌ Direct Shift Rostering & Staff Scheduling',
+      '❌ Candidate Verification Credentials',
+    ],
+  },
+  compliance_officer: {
+    id: 'compliance_officer',
+    name: 'Patricia Ramos',
+    userTitle: 'Senior Regulatory Compliance Auditor',
+    portal: 'agency',
+    portalLabel: 'Agency Staffing Portal',
+    landingTab: 'compliance',
+    allowedTabs: ['compliance', 'professionals', 'audit_trail', 'rbac_guide'],
+    deniedAccessMessage: 'Regulatory scope: Restricted to credential audits, primary source registry checks, and WTD policies.',
+    canSeeData: [
+      'Primary Source Credential Verification Queue',
+      'OCR Document Scanner & Fraud Detection',
+      'WTD Working Time Directive Rules (11h Rest Gap, 48h Cap)',
+      'Cryptographic Compliance Audit Logs',
+    ],
+    blockedData: [
+      '❌ Hospital Commercial Invoice Ledgers',
+      '❌ Clinician Instant Pay Debit Card Push Rails',
+    ],
+  },
+  payroll: {
+    id: 'payroll',
+    name: 'Marcus Sterling',
+    userTitle: 'Agency Payroll & Remittance Officer',
+    portal: 'agency',
+    portalLabel: 'Agency Staffing Portal',
+    landingTab: 'billing',
+    allowedTabs: ['billing', 'timesheets', 'rbac_guide'],
+    deniedAccessMessage: 'Payroll scope: Access restricted to locked timesheets and payment remittances.',
+    canSeeData: [
+      'Locked Timesheets with Billable & Overtime Hours',
+      'Real-Time Instant Pay Push Rails (1.5% Fee Engine)',
+      'Gross Remittance & Contractor Invoices',
+    ],
+    blockedData: [
+      '❌ Clinical Acuity Data & Patient Notes',
+      '❌ Emergency Room Triage Ratios',
+    ],
+  },
+  support_agent: {
+    id: 'support_agent',
+    name: 'Chloe Davis',
+    userTitle: 'Clinical Helpdesk & Operations Specialist',
+    portal: 'agency',
+    portalLabel: 'Agency Staffing Portal',
+    landingTab: 'support',
+    allowedTabs: ['support', 'shifts', 'rbac_guide'],
+    deniedAccessMessage: 'Support scope: Manages shift disputes, incident cases, and urgent staffing queries.',
+    canSeeData: [
+      'Shift Incident & Dispute Escalation Cases',
+      'Operational Broadcast Notifications',
+      'Shift Check-in Timestamps & Communication Logs',
+    ],
+    blockedData: [
+      '❌ Executive Profit & Loss Accounting',
+      '❌ Policy Threshold Editing',
+    ],
+  },
+  agency_admin: {
+    id: 'agency_admin',
+    name: 'Arthur Pendelton',
+    userTitle: 'Healthcare Staffing Agency Director',
+    portal: 'agency',
+    portalLabel: 'Agency Staffing Portal',
+    landingTab: 'analytics',
+    allowedTabs: ['shifts', 'professionals', 'compliance', 'billing', 'analytics', 'support', 'rbac_guide'],
+    deniedAccessMessage: 'Agency Director scope: Full management of candidate pool, agency billings, and matching dispatch.',
+    canSeeData: [
+      'All Candidate Placement Metrics & Hit Rates',
+      'Multi-Facility Shift Broadcast Dispatches',
+      'Agency Gross Margin & Revenue Analytics',
+      'Compliance Health & Audit Reports',
+    ],
+    blockedData: [
+      '❌ Hospital Internal Executive Medical Committee Notes',
+    ],
+  },
+  recruiter: {
+    id: 'recruiter',
+    name: 'Jessica Gomez',
+    userTitle: 'Senior Clinical Talent Recruiter',
+    portal: 'agency',
+    portalLabel: 'Agency Staffing Portal',
+    landingTab: 'professionals',
+    allowedTabs: ['professionals', 'shifts', 'matching', 'rbac_guide'],
+    deniedAccessMessage: 'Talent scope: Manage candidate rosters, interviews, and shift placements.',
+    canSeeData: [
+      'Clinician Talent Pool & Availabilities',
+      'Shift Vacancies & Match Scoring',
+      'Candidate Ratings & Reliability Histories',
+    ],
+    blockedData: [
+      '❌ Master Financial Accounting & Aging Buckets',
+      '❌ Audit Trail System Encryption Keys',
+    ],
+  },
+  business_leader: {
+    id: 'business_leader',
+    name: 'Robert Vance, VP',
+    userTitle: 'VP of Healthcare Workforce Operations',
+    portal: 'agency',
+    portalLabel: 'Agency Staffing Portal',
+    landingTab: 'analytics',
+    allowedTabs: ['analytics', 'floor', 'rbac_guide'],
+    deniedAccessMessage: 'Executive scope: High-level KPI dashboards, fill rate velocity, and workforce utilization.',
+    canSeeData: [
+      'Executive KPI Telemetry & Fill Rate Curves',
+      'Workforce Acuity Ratios & Mean Time-to-Fill',
+      'Multi-Hospital Staffing Efficiency Trends',
+    ],
+    blockedData: [
+      '❌ Granular Individual Shift Check-in Edits',
+      '❌ Individual User Password Reset & Secret Keys',
+    ],
+  },
+};
+
+export interface PortalNavigationItem {
+  id: string;
+  label: string;
+  portal: PortalType;
+  requiredRoles?: Role[];
+}

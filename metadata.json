@@ -1,0 +1,6 @@
+{
+  "name": "Nexgile-MediOracle Healthcare Workforce Portal",
+  "description": "Healthcare workforce management platform connecting healthcare facilities with qualified professionals for shift-based staffing, matching, compliance, timekeeping, billing, and payments.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
